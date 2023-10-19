@@ -149,7 +149,10 @@ async function main() {
   }
 
   // split file into lines
-  const lines = backtrace_text.split('\n');
+  let lines = backtrace_text.split('\n');
+
+  // strip lines starting with 'Recv: ', irgnoring case (OctoPrint terminal)
+  lines = lines.map((line) => line.replace(/^recv: /i, ''));
 
   // parse lines of the backtrace
   console.log('Backtrace:');

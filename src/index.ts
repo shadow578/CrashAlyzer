@@ -294,10 +294,10 @@ async function main() {
     const bt = await parseBacktraceLine(line);
     if (bt) {
       btLines.push([
-        `#${bt.position}`,
+        `${bt.position}`,
         `${bt.function}${bt.name == 'unknown' ? '' : ` (${bt.name})`}`,
-        `@ ${numToHex(bt.fnAddress)} + ${bt.fnOffset}`,
-        `PC:${numToHex(bt.pc)}`,
+        `${numToHex(bt.fnAddress)} + ${bt.fnOffset}`,
+        `${numToHex(bt.pc)}`,
         `${bt.fileName}:${bt.line}`,
       ]);
     }

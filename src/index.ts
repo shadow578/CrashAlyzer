@@ -180,7 +180,15 @@ async function printRegisters(registers: RegisterInfo[]) {
         flagOut.push(`BFAR: ${numToHex(bfar.value)}`);
       }
 
-      out.push(flagOut);
+      out.push(['CFSR', numToHex(cfsr.value)]);
+      if (flagOut.length > 1) {
+        out.push(flagOut);
+
+        console.log(`for details on CFSR flags, see
+ - https://developer.arm.com/documentation/dui0552/a/cortex-m3-peripherals/system-control-block/configurable-fault-status-register?lang=en
+ - https://developer.arm.com/documentation/dui0553/a/the-cortex-m4-processor/exception-model/fault-reporting/cfsr---configurable-fault-status-register
+ `);
+      }
     });
   }
 

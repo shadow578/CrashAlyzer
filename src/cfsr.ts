@@ -1,28 +1,84 @@
+/**
+ * CFSR MemFault flag names to bit position in MemManage Fault Status Register
+ */
+const MemFaultFlags = {
+  MMARVALID: 7,
+  MLSPERR: 5,
+  MSTKERR: 4,
+  MUNSTKERR: 3,
+  DACCVIOL: 1,
+  IACCVIOL: 0,
+};
 
-export const MEMFAULTSR_MASK = 0xff
-export const MMARVALID_MASK = 1 << 7
-export const MLSPERR_MASK = 1 << 5
-export const MSTKERR_MASK = 1 << 4
-export const MUNSTKERR_MASK = 1 << 3
-export const DACCVIOL_MASK = 1 << 1
-export const IACCVIOL_MASK = 1 << 0
+/**
+ * CFSR BusFault flag names to bit position in Bus Fault Status Register
+ */
+const BusFaultFlags = {
+  BFARVALID: 7,
+  LSPERR: 5,
+  STKERR: 4,
+  UNSTKERR: 3,
+  IMPRECISERR: 2,
+  PRECISERR: 1,
+  IBUSERR: 0,
+};
 
+/**
+ * CFSR UsageFault flag names to bit position in Usage Fault Status Register
+ */
+const UsageFaultFlags = {
+  DIVBYZERO: 9,
+  UNALIGNED: 8,
+  NOCP: 3,
+  INVPC: 2,
+  INVSTATE: 1,
+  UNDEFINSTR: 0,
+};
 
-export const BUSFAULTSR_MASK = 0xff << 8
-export const BFARVALID_MASK = 1 << 7
-export const LSPERR_MASK = 1 << 5
-export const STKERR_MASK = 1 << 4
-export const UNSTKERR_MASK = 1 << 3
-export const IMPRECISERR_MASK = 1 << 2
-export const PRECISERR_MASK = 1 << 1
-export const IBUSERR_MASK = 1 << 0
+/**
+ * offset of MemManage Fault Status Register in CFSR
+ */
+const MMFSR_OFFSET = 0;
 
+/**
+ * offset of Bus Fault Status Register in CFSR
+ */
+const BFSR_OFFSET = 8;
 
-export const USAGEFAULTSR_MASK = 0xff << 16
-export const DIVBYZERO_MASK = 1 << 9
-export const UNALIGNED_MASK = 1 << 8
-export const NOCP_MASK = 1 << 3
-export const INVPC_MASK = 1 << 2
-export const INVSTATE_MASK = 1 << 1
-export const UNDEFINSTR_MASK = 1 << 0
+/**
+ * offset of Usage Fault Status Register in CFSR
+ */
+const UFSR_OFFSET = 16;
 
+export type MemFaultFlag = keyof typeof MemFaultFlags;
+export type BusFaultFlag = keyof typeof BusFaultFlags;
+export type UsageFaultFlag = keyof typeof UsageFaultFlags;
+export type CFSRFaultFlag = MemFaultFlag | BusFaultFlag | UsageFaultFlag;
+
+/**
+ * parse CFSR register value into set of CFSR fault flags
+ *
+ * @param cfsr CFSR register value
+ * @returns set of CFSR fault flags
+ */
+export function parseCFSR(cfsr: number): Set<CFSRFaultFlag> {
+  const flags = new Set<CFSRFaultFlag>();
+
+  const checkFlag = (offset: number, bit: number): boolean => {
+    return (cfsr & (1 << (offset + bit))) !== 0;
+  };
+
+  const checkFlags = (offset: number, flagDef: Record<string, number>): void => {
+    for (const flag of Object.keys(flagDef)) {
+      if (checkFlag(offset, flagDef[flag])) {
+        flags.add(flag as CFSRFaultFlag);
+      }
+    }
+  };
+
+  checkFlags(MMFSR_OFFSET, MemFaultFlags);
+  checkFlags(BFSR_OFFSET, BusFaultFlags);
+  checkFlags(UFSR_OFFSET, UsageFaultFlags);
+
+  return flags;
+}

@@ -163,49 +163,25 @@ async function printRegisters(registers: RegisterInfo[]) {
   const bfar = findRegister('BFAR');
 
   // print CFSR register
-  const cfsrReg = findRegister('CFSR');
-  if (cfsrReg) {
-    const cfsr = cfsrReg.value;
+  const cfsr = findRegister('CFSR');
+  if (cfsr) {
+    const cfsrFlags = CFRS.parseCFSR(cfsr.value);
 
-    const checkFlag = (flag: number, name: string, extraColumnsIfSet: string[] = []) => {
-      if (cfsr & flag) {
-        out.push(['', name, ...extraColumnsIfSet]); // empty column for alignment
+    cfsrFlags.forEach((flag) => {
+      const flagOut = ['', flag]; // empty column for alignment
+
+      // handle MMARVALID flag
+      if (flag === 'MMARVALID' && mmar) {
+        flagOut.push(`MMAR: ${numToHex(mmar.value)}`);
       }
-    };
 
-    // Memory Management Fault
-    if (cfsr & CFRS.MEMFAULTSR_MASK) {
-      out.push(['', 'Memory Management Fault']);
-      checkFlag(CFRS.MMARVALID_MASK, 'MMARVALID', mmar ? [`MMAR: ${numToHex(mmar.value)}`] : []);
-      checkFlag(CFRS.MLSPERR_MASK, 'MLSPERR');
-      checkFlag(CFRS.MSTKERR_MASK, 'MSTKERR');
-      checkFlag(CFRS.MUNSTKERR_MASK, 'MUNSTKERR');
-      checkFlag(CFRS.DACCVIOL_MASK, 'DACCVIOL');
-      checkFlag(CFRS.IACCVIOL_MASK, 'IACCVIOL');
-    }
+      // handle BFARVALID flag
+      if (flag === 'BFARVALID' && bfar) {
+        flagOut.push(`BFAR: ${numToHex(bfar.value)}`);
+      }
 
-    // But Fault
-    if (cfsr & CFRS.BUSFAULTSR_MASK) {
-      out.push(['', 'Bus Fault']);
-      checkFlag(CFRS.BFARVALID_MASK, 'BFARVALID', bfar ? [`BFAR: ${numToHex(bfar.value)}`] : []);
-      checkFlag(CFRS.LSPERR_MASK, 'LSPERR');
-      checkFlag(CFRS.STKERR_MASK, 'STKERR');
-      checkFlag(CFRS.UNSTKERR_MASK, 'UNSTKERR');
-      checkFlag(CFRS.IMPRECISERR_MASK, 'IMPRECISERR');
-      checkFlag(CFRS.PRECISERR_MASK, 'PRECISERR');
-      checkFlag(CFRS.IBUSERR_MASK, 'IBUSERR');
-    }
-
-    // Usage Fault
-    if (cfsr & CFRS.USAGEFAULTSR_MASK) {
-      out.push(['', 'Usage Fault']);
-      checkFlag(CFRS.DIVBYZERO_MASK, 'DIVBYZERO');
-      checkFlag(CFRS.UNALIGNED_MASK, 'UNALIGNED');
-      checkFlag(CFRS.NOCP_MASK, 'NOCP');
-      checkFlag(CFRS.INVPC_MASK, 'INVPC');
-      checkFlag(CFRS.INVSTATE_MASK, 'INVSTATE');
-      checkFlag(CFRS.UNDEFINSTR_MASK, 'UNDEFINSTR');
-    }
+      out.push(flagOut);
+    });
   }
 
   // print output
@@ -305,7 +281,7 @@ async function main() {
   await printRegisters(registers);
 
   // parse lines of the backtrace
-  const btLines: string[][] = [[], ["Backtrace"], ['#', 'Function', 'Address', 'PC', 'File:Line']];
+  const btLines: string[][] = [[], ['Backtrace'], ['#', 'Function', 'Address', 'PC', 'File:Line']];
   for (const line of lines) {
     const bt = await parseBacktraceLine(line);
     if (bt) {

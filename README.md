@@ -19,9 +19,6 @@ CrashAlyzer is your easy-to-use(™) crashlog analyzer for ARM Cortex-M microcon
 
 ## Getting Started
 
-> [!IMPORTANT]
-> installation and usage is not final yet, and may change in the future
-
 Getting started with CrashAlyzer is a breeze. Follow these simple steps to unleash the power of Cortex M debugging:
 
 1. **Installation**: Install CrashAlyzer using via your favorite package manager (as long as that happens to be npm).
@@ -35,7 +32,7 @@ $ npm install -g @shadow578/crashalyzer
 ```bash
 $ crashalyzer
     ? Crash Log » (...)
-    ? Path to elf file » firmware.elf
+    ? Path to ELF File » firmware.elf
 ```
 
 3. **Discover the Magic**: Dive deep into the crash log analysis, unlock the secrets of your microcontroller, and conquer your project like a true hero! 🦸‍♂️

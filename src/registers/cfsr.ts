@@ -1,4 +1,4 @@
-import { checkFlags } from "./common";
+import { checkFlags } from './common';
 
 /**
  * CFSR MemFault flag names to bit position in MemManage Fault Status Register

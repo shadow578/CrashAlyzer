@@ -3,6 +3,7 @@ import { TablePrinter } from './ui/table';
 import { addr2line as invokeAddr2line, Addr2LineResult, setAddr2LinePath, addr2lineAvailable } from './addr2line';
 import * as CFSR from './registers/cfsr';
 import * as HFSR from './registers/hfsr';
+import * as PSR from './registers/psr';
 import { prompt } from 'enquirer';
 import * as fs from 'fs';
 import * as chalk from 'chalk';
@@ -199,6 +200,14 @@ const HFSRFlagDocs: Record<HFSR.HFSRFaultFlag, string> = {
   VECTBL: 'Vector Table Hard Fault 🚧',
 };
 
+const APSRFlagDocs: Record<PSR.APSRFlag, string> = {
+  N: 'Negative Condition Flag',
+  Z: 'Zero Condition Flag',
+  C: 'Carry Condition Flag',
+  V: 'Overflow Condition Flag',
+  Q: 'Cumulative saturation flag',
+};
+
 /**
  * custom formatter functions for registers.
  * @param tbl table writer to push formatted values to.
@@ -251,6 +260,23 @@ const registerFormatters: Partial<Record<keyof CrashLogRegisters, RegisterFormat
         .commitRow() // finish previous row
         .pushColumn('') // empty column for alignment
         .pushColumn(`- ${flag}: ${HFSRFlagDocs[flag]}`, 0); // flag name and doc, width=0 to bypass table formatting
+    });
+  },
+  PSR: async (tbl, value) => {
+    const psr = PSR.parse(value);
+
+    // IPSR:
+    tbl
+      .commitRow() // finish previous row
+      .pushColumn('') // empty column for alignment
+      .pushColumn(`- IPSR: ${psr.IPSR}`, 0); // flag name and doc, width=0 to bypass table formatting
+
+    // APSR:
+    psr.APSR.forEach((flag) => {
+      tbl
+        .commitRow() // finish previous row
+        .pushColumn('') // empty column for alignment
+        .pushColumn(`- ${flag}: ${APSRFlagDocs[flag]}`, 0); // flag name and doc, width=0 to bypass table formatting
     });
   },
 };

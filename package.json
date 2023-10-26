@@ -1,7 +1,7 @@
 {
-  "name": "typescript-project-template",
-  "version": "0.1.0",
-  "description": "",
+  "name": "@shadow578/crashalyzer",
+  "version": "1.0.0",
+  "description": "CrashAlyzer is your easy-to-use(™) crashlog analyzer for ARM Cortex-M microcontrollers.",
   "author": "shadow578",
   "license": "MIT",
   "keywords": [
@@ -9,17 +9,21 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shadow578/typescript-project-template.git"
+    "url": "git+https://github.com/shadow578/CrashAlyzer.git"
   },
-  "homepage": "https://github.com/shadow578/typescript-project-template",
+  "homepage": "https://github.com/shadow578/CrashAlyzer",
   "bugs": {
-    "url": "https://github.com/shadow578/typescript-project-template/issues"
+    "url": "https://github.com/shadow578/CrashAlyzer/issues"
   },
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
   "files": [
     "lib/**/*"
   ],
+  "main": "lib/cli.js",
+  "types": "lib/index.d.ts",
+  "preferGlobal": true,
+  "bin": {
+    "crashalyzer": "./lib/cli.js"
+  },
   "scripts": {
     "build": "tsc",
     "start": "npm run build & node .",

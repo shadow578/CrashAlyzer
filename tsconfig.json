@@ -5,8 +5,14 @@
     "declaration": true,
     "outDir": "lib",
     "strict": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "allowJs": true,
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "**/__tests__/*"]
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/__tests__/*"
+  ],
 }

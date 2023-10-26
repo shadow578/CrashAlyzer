@@ -25,22 +25,48 @@ async function main() {
       type: 'input',
       name: 'crashLog',
       multiline: true,
-      message: 'Crash Log',
-      validate: validateCrashLog,
+      message: 'Crash Log 📃',
+      validate: async (input) => {
+        // must not be empty
+        if (input.trim().length <= 0) {
+          return '🙅‍♂️ Crash log cannot be empty. Please re-enter the crash log.';
+        }
+
+        // check if any parser can handle the input
+        for (const p of PARSERS) {
+          if (await p.canParse(cleanupAndSplitCrashLog(input))) {
+            return true;
+          }
+        }
+
+        return "Oops! It seems we couldn't find a parser for the given crash log. Please re-enter the crash log. 🤔";
+      },
     },
     {
       type: 'input',
       name: 'elfPath',
       initial: './firmware.elf',
-      message: 'Path to elf file',
-      validate: validatePathExists,
+      message: 'Path to ELF File 📂',
+      validate: (path) => {
+        if (fs.existsSync(path)) {
+          return true;
+        }
+
+        return 'Uh-oh! It seems we cannot access the firmware file you provided. Please re-enter the path to firmware.elf. 🤖';
+      },
     },
     {
       type: 'input',
       name: 'addr2linePath',
       initial: 'arm-none-eabi-addr2line',
-      message: 'Path to addr2line',
-      validate: validateAddr2Line,
+      message: 'Path to Addr2line 📂',
+      validate: async (path) => {
+        if (await addr2lineAvailable(path)) {
+          return true;
+        }
+
+        return `Oops! It appears we cannot execute addr2line @ ${path}. Please re-enter the path to addr2line. 🤷‍♂️`;
+      },
     },
   ])) as {
     crashLog: string;
@@ -67,12 +93,16 @@ async function main() {
   }
 
   if (!parser) {
-    console.log(chalk.red('❌'), chalk.white("Couldn't find a parser for the given crash log"));
+    console.log(
+      '🧐',
+      chalk.red(
+        "Oops! It seems we couldn't find a parser for the given crash log. Please check your input and try again.",
+      ),
+    );
     return;
-    //throw new Error('No parser found for the given crash log');
   }
 
-  console.log(chalk.green('✔'), chalk.white('Using parser:'), chalk.blue(parser.name));
+  console.log(chalk.green('Using parser:'), chalk.blue(parser.name), '🚀');
 
   // parse the crash log
   const crashLog = await parser.parse(crashLogLines);
@@ -81,7 +111,7 @@ async function main() {
 
   // registers
   console.log();
-  console.log(chalk.green('📃'), chalk.white('Registers:'));
+  console.log(chalk.blue('📊 Registers:'));
   console.log(
     chalk.white(
       (await formatRegisters(crashLog.registers)).toString({
@@ -94,11 +124,11 @@ async function main() {
   // backtrace
   if (parser.backtraceSupported) {
     console.log();
-    console.log(chalk.green('🚀'), chalk.white('Backtrace:'));
+    console.log(chalk.blue('🚀 Backtrace:'));
     if (crashLog.backtrace.length > 0) {
       console.log(chalk.white((await formatBacktrace(crashLog.backtrace)).toString()));
     } else {
-      console.log(chalk.red('❌'), chalk.white('no backtrace found'));
+      console.log(chalk.yellow('No backtrace found 🤷‍♂️'));
     }
   }
 
@@ -106,62 +136,17 @@ async function main() {
   if (crashLog.registers.CFSR !== 0) {
     console.log();
     console.log(
-      chalk.blue('❓'),
-      chalk.white('For more information on how to interpret the CFSR flags, see:'),
-      chalk.white('\n -'),
-      chalk.blue(chalk.underline('https://interrupt.memfault.com/blog/cortex-m-fault-debug')),
-      chalk.white('\n -'),
-      chalk.blue(
-        chalk.underline(
-          'https://developer.arm.com/documentation/dui0552/a/cortex-m3-peripherals/system-control-block/configurable-fault-status-register',
-        ),
-      ),
-      chalk.white('\n -'),
-      chalk.blue(
-        chalk.underline(
-          'https://developer.arm.com/documentation/dui0553/a/the-cortex-m4-processor/exception-model/fault-reporting/cfsr---configurable-fault-status-register',
-        ),
-      ),
+      chalk.cyan('📚 For more information on how to interpret the CFSR flags, see: '),
+      // links to the CFSR spec and some blog posts about it
+      ...[
+        'https://interrupt.memfault.com/blog/cortex-m-fault-debug',
+        'https://developer.arm.com/documentation/dui0552/a/cortex-m3-peripherals/system-control-block/configurable-fault-status-register',
+        'https://developer.arm.com/documentation/dui0553/a/the-cortex-m4-processor/exception-model/fault-reporting/cfsr---configurable-fault-status-register',
+      ].flatMap((link) => [chalk.cyan('\n -'), chalk.blue(chalk.underline(link))]),
     );
   }
 }
 main();
-
-// #region enquirer validators
-
-function validatePathExists(path: string): true | string {
-  if (fs.existsSync(path)) {
-    return true;
-  }
-
-  return 'cannot access file';
-}
-
-async function validateAddr2Line(path: string): Promise<true | string> {
-  if (await addr2lineAvailable(path)) {
-    return true;
-  }
-
-  return `cannot execute addr2line @ ${path}`;
-}
-
-async function validateCrashLog(input: string): Promise<true | string> {
-  // must not be empty
-  if (input.trim().length <= 0) {
-    return 'cannot be empty';
-  }
-
-  // check if any parser can handle the input
-  for (const p of PARSERS) {
-    if (await p.canParse(cleanupAndSplitCrashLog(input))) {
-      return true;
-    }
-  }
-
-  return "couldn't find a parser for the given crash log";
-}
-
-// #endregion
 
 // #region utils
 
@@ -179,6 +164,33 @@ async function addr2line(address: number): Promise<Addr2LineResult | undefined> 
 // #endregion
 
 // #region register formatting
+
+const CFSRFlagDocs: Record<CFSR.CFSRFaultFlag, string> = {
+  // MemFault
+  MMARVALID: 'Memory Management Fault Address Register (MMAR) is valid 🧐',
+  MLSPERR: 'Memory Management Fault occurred during floating-point lazy state preservation 🤖',
+  MSTKERR: 'Memory Management Fault occurred during exception stacking 🤖',
+  MUNSTKERR: 'Memory Management Fault occurred during exception unstacking 🤖',
+  DACCVIOL: 'Data Access Violation 🚧',
+  IACCVIOL: 'Instruction Access Violation 🚧',
+
+  // BusFault
+  BFARVALID: 'Bus Fault Address Register (BFAR) is valid 🧐',
+  LSPERR: 'Bus Fault occurred during floating-point lazy state preservation 🤖',
+  STKERR: 'Bus Fault occurred during exception stacking 🤖',
+  UNSTKERR: 'Bus Fault occurred during exception unstacking 🤖',
+  IMPRECISERR: 'Imprecise Data Access Error 🚧',
+  PRECISERR: 'Precise Data Access Error 🚧',
+  IBUSERR: 'Instruction Bus Error 🚧',
+
+  // UsageFault
+  DIVBYZERO: 'Division By Zero 🚫',
+  UNALIGNED: 'Unaligned Access 🚧',
+  NOCP: 'No Coprocessor 🤷‍♂️',
+  INVPC: 'Invalid PC Load 🚧',
+  INVSTATE: 'Invalid State 🚧',
+  UNDEFINSTR: 'Undefined Instruction 🚫',
+};
 
 /**
  * custom formatter functions for registers.
@@ -213,7 +225,7 @@ const registerFormatters: Partial<Record<keyof CrashLogRegisters, RegisterFormat
       tbl
         .commitRow() // finish previous row
         .pushColumn('') // empty column for alignment
-        .pushColumn(`- ${flag}`); // flag name
+        .pushColumn(`- ${flag}: ${CFSRFlagDocs[flag]}`, 0); // flag name and doc, width=0 to bypass table formatting
 
       // handle MMARVALID flag
       if (flag === 'MMARVALID' && registers.MMAR) {

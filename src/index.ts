@@ -1,4 +1,4 @@
-import PARSERS, { CrashLogParser, CrashLogRegisters, BackTrace } from './parsers';
+import PARSERS, { CrashLogParser, CrashLogRegisters, BackTrace, cleanupAndSplitCrashLog } from './parsers';
 import { TablePrinter } from './ui/table';
 import { addr2line as invokeAddr2line, Addr2LineResult, setAddr2LinePath } from './addr2line';
 import * as CFSR from './cfsr';
@@ -168,21 +168,6 @@ async function validateCrashLog(input: string): Promise<true | string> {
 // #endregion
 
 // #region utils
-
-/**
- * clean up crash log and split into lines
- *
- * @param crashLog the crash log to cleanup
- * @returns the cleaned up crash log lines
- */
-function cleanupAndSplitCrashLog(crashLog: string): string[] {
-  return crashLog
-    .split(/\r?\n/) // split into lines
-    .map((line) => line.trim()) // trim whitespace
-    .map((line) => line.replace(/^recv:/i, '')) // remove 'Recv:' prefix (OctoPrint terminal)
-    .map((line) => line.trim()) // trim whitespace again
-    .filter((line) => line.length > 0); // remove empty lines
-}
 
 /**
  * wrapper around addr2line

@@ -1,4 +1,5 @@
 import { CrashLogParser, CrashLog, BacktraceItem, BackTrace, CrashLogRegisters } from './base';
+import { cleanupAndSplitCrashLog } from './util';
 import { HC32Parser } from './hc32';
 import { MarlinParser } from './marlin';
 
@@ -8,4 +9,4 @@ const parsers: CrashLogParser[] = [
 ];
 
 export default parsers;
-export { CrashLogParser, CrashLog, BacktraceItem, BackTrace, CrashLogRegisters };
+export { CrashLogParser, CrashLog, BacktraceItem, BackTrace, CrashLogRegisters, cleanupAndSplitCrashLog };

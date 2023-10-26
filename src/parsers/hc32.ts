@@ -1,4 +1,4 @@
-import { BacktraceItem, CrashLog, CrashLogParser, CrashLogRegisters } from './base';
+import { CrashLog, CrashLogParser, CrashLogRegisters } from './base';
 
 /**
  * crashlog parser for framework-arduino-hc32f46x's HardFault_Handler
@@ -108,9 +108,7 @@ export class HC32Parser extends CrashLogParser {
 
     // check if the register value is a number
     if (isNaN(value)) {
-      console.error(`Failed to parse register value: ${match[2]} (line: ${line})`);
-      return;
-      //throw new Error(`Failed to parse register value: ${match[2]} (line: ${line})`);
+      throw new Error(`Failed to parse register value: ${match[2]} (line: ${line})`);
     }
 
     return {

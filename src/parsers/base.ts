@@ -80,6 +80,11 @@ export abstract class CrashLogParser {
   public abstract get name(): string;
 
   /**
+   * does this parser support backtrace parsing?
+   */
+  public abstract get backtraceSupported(): boolean;
+
+  /**
    * check if this parser can parse the given crash log
    *
    * @param crashLogLines lines of the crash log, empty lines are already removed

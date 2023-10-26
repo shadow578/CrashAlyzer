@@ -95,10 +95,14 @@ async function main() {
   );
 
   // backtrace
-  if (crashLog.backtrace.length > 0) {
+  if (parser.backtraceSupported) {
     console.log();
     console.log(chalk.green('🚀'), chalk.white('Backtrace:'));
-    console.log(chalk.white((await formatBacktrace(crashLog.backtrace)).toString()));
+    if (crashLog.backtrace.length > 0) {
+      console.log(chalk.white((await formatBacktrace(crashLog.backtrace)).toString()));
+    } else {
+      console.log(chalk.red('❌'), chalk.white('no backtrace found'));
+    }
   }
 
   // CFSR help text

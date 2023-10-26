@@ -4,6 +4,7 @@ import { addr2line as invokeAddr2line, Addr2LineResult, setAddr2LinePath } from 
 import * as CFSR from './cfsr';
 import { prompt } from 'enquirer';
 import * as fs from 'fs';
+import * as chalk from 'chalk';
 import { promisify } from 'util';
 import { exec } from 'child_process';
 const execAsync = promisify(exec);
@@ -69,9 +70,12 @@ async function main() {
   }
 
   if (!parser) {
-    throw new Error('No parser found for the given crash log');
+    console.log(chalk.red('❌'), chalk.white("Couldn't find a parser for the given crash log"));
+    return;
+    //throw new Error('No parser found for the given crash log');
   }
-  console.log(`Using parser: ${parser.name}`);
+
+  console.log(chalk.green('✔'), chalk.white('Using parser:'), chalk.blue(parser.name));
 
   // parse the crash log
   const crashLog = await parser.parse(crashLogLines);
@@ -79,21 +83,46 @@ async function main() {
   // output crash log to console:
 
   // registers
-  console.log('Registers: ');
-  console.log((await formatRegisters(crashLog.registers)).toString());
+  console.log();
+  console.log(chalk.green('📃'), chalk.white('Registers:'));
+  console.log(
+    chalk.white(
+      (await formatRegisters(crashLog.registers)).toString({
+        cellSeparator: '  ',
+        printHeaderSeparator: false,
+      }),
+    ),
+  );
+
+  // backtrace
+  if (crashLog.backtrace.length > 0) {
+    console.log();
+    console.log(chalk.green('🚀'), chalk.white('Backtrace:'));
+    console.log(chalk.white((await formatBacktrace(crashLog.backtrace)).toString()));
+  }
 
   // CFSR help text
   if (crashLog.registers.CFSR !== 0) {
-    console.log(`for details on CFSR flags, see
-      - https://developer.arm.com/documentation/dui0552/a/cortex-m3-peripherals/system-control-block/configurable-fault-status-register?lang=en
-      - https://developer.arm.com/documentation/dui0553/a/the-cortex-m4-processor/exception-model/fault-reporting/cfsr---configurable-fault-status-register
-       `);
+    console.log();
+    console.log(
+      chalk.blue('❓'),
+      chalk.white('For more information on how to interpret the CFSR flags, see:'),
+      chalk.white('\n -'),
+      chalk.blue(chalk.underline('https://interrupt.memfault.com/blog/cortex-m-fault-debug')),
+      chalk.white('\n -'),
+      chalk.blue(
+        chalk.underline(
+          'https://developer.arm.com/documentation/dui0552/a/cortex-m3-peripherals/system-control-block/configurable-fault-status-register',
+        ),
+      ),
+      chalk.white('\n -'),
+      chalk.blue(
+        chalk.underline(
+          'https://developer.arm.com/documentation/dui0553/a/the-cortex-m4-processor/exception-model/fault-reporting/cfsr---configurable-fault-status-register',
+        ),
+      ),
+    );
   }
-
-  // backtrace
-  console.log();
-  console.log('Backtrace: ');
-  console.log((await formatBacktrace(crashLog.backtrace)).toString());
 }
 main();
 

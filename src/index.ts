@@ -1,7 +1,12 @@
-import PARSERS, { CrashLogParser, CrashLog, CrashLogRegisters, BacktraceItem, BackTrace } from './parsers';
+import PARSERS, { CrashLogParser, CrashLogRegisters, BackTrace } from './parsers';
 import { TablePrinter } from './ui/table';
 import { addr2line as invokeAddr2line, Addr2LineResult, setAddr2LinePath } from './addr2line';
 import * as CFSR from './cfsr';
+import { prompt } from 'enquirer';
+import * as fs from 'fs';
+import { promisify } from 'util';
+import { exec } from 'child_process';
+const execAsync = promisify(exec);
 
 // add toHex() function to numbers
 declare global {
@@ -16,39 +21,43 @@ Number.prototype.toHex = function (minBytes = 0) {
 let elfPath: string;
 
 async function main() {
-  //TODO read args / user input
-  const addr2linePath = 'arm-none-eabi-addr2line';
-  setAddr2LinePath(addr2linePath);
-  elfPath = './firmware.elf';
-  const crashLogText = `
-## Software Fault detected ##
-Cause: Hard
-R0   : 0x00000002
-R1   : 0x1FFF8B31
-R2   : 0x00000000
-R3   : 0x000001C4
-R12  : 0x7FFFFFFF
-LR   : 0x1FFF8494
-PC   : 0x0001C7B2
-PSR  : 0x61000000
-CFSR : 0x02000000
-HFSR : 0x40000000
-DFSR : 0x00000000
-AFSR : 0x00000000
-MMAR : 0xE000ED34
-BFAR : 0xE000ED38
-ExcLR: 0xFFFFFFF9
-ExcSP: 0x1FFFB158
-Backtrace:#1 : unknown@0x0001C39C+1046 PC:0x0001C7B2
-#2 : unknown@0x0001BA20+1746 PC:0x0001C0F2
-#3 : unknown@0x0001E4B4+102 PC:0x0001E51A
-#4 : unknown@0x000172A4+88 PC:0x000172FC
-#5 : unknown@0x00013E5C+38 PC:0x00013E82
-#6 : unknown@0x0001293C+128 PC:0x000129BC
-  `;
+  // get args from user
+  const userInput = (await prompt([
+    {
+      type: 'input',
+      name: 'crashLog',
+      multiline: true,
+      message: 'Crash Log',
+      validate: validateCrashLog,
+    },
+    {
+      type: 'input',
+      name: 'elfPath',
+      initial: './firmware.elf',
+      message: 'Path to elf file',
+      validate: validatePathExists,
+    },
+    {
+      type: 'input',
+      name: 'addr2linePath',
+      initial: 'arm-none-eabi-addr2line',
+      message: 'Path to addr2line',
+      validate: validateAddr2Line,
+    },
+  ])) as {
+    crashLog: string;
+    elfPath: string;
+    addr2linePath: string;
+  };
+
+  // set global addr2line path
+  setAddr2LinePath(userInput.addr2linePath);
+
+  // set global elf path
+  elfPath = userInput.elfPath;
 
   // split crash log into lines
-  const crashLogLines = cleanupAndSplitCrashLog(crashLogText);
+  const crashLogLines = cleanupAndSplitCrashLog(userInput.crashLog);
 
   // find the right parser for the crash log
   let parser: CrashLogParser | undefined = undefined;
@@ -87,6 +96,43 @@ Backtrace:#1 : unknown@0x0001C39C+1046 PC:0x0001C7B2
   console.log((await formatBacktrace(crashLog.backtrace)).toString());
 }
 main();
+
+// #region enquirer validators
+
+function validatePathExists(path: string): true | string {
+  if (fs.existsSync(path)) {
+    return true;
+  }
+
+  return 'cannot access file';
+}
+
+async function validateAddr2Line(path: string): Promise<true | string> {
+  try {
+    await execAsync(`${path} --version`);
+    return true;
+  } catch (error) {
+    return `cannot execute ${path}: ${error}`;
+  }
+}
+
+async function validateCrashLog(input: string): Promise<true | string> {
+  // must not be empty
+  if (input.trim().length <= 0) {
+    return 'cannot be empty';
+  }
+
+  // check if any parser can handle the input
+  for (const p of PARSERS) {
+    if (await p.canParse(cleanupAndSplitCrashLog(input))) {
+      return true;
+    }
+  }
+
+  return "couldn't find a parser for the given crash log";
+}
+
+// #endregion
 
 // #region utils
 
@@ -219,7 +265,9 @@ async function formatBacktrace(backtrace: BackTrace): Promise<TablePrinter> {
   for (const [i, item] of backtrace.map((item, i) => [i, item] as const)) {
     const a2l = await addr2line(item.PC);
 
-    const functionPlusOffset = `${item.function?.baseAddress.toHex(4) ?? '??'}+${item.function?.instructionOffset ?? '??'}`;
+    const functionPlusOffset = `${item.function?.baseAddress.toHex(4) ?? '??'}+${
+      item.function?.instructionOffset ?? '??'
+    }`;
     const functionName = a2l ? a2l.functionName : item.function?.name ?? '??';
     const filePlusLine = a2l ? `${a2l.file.name}:${a2l.line}` : '??:?';
     tbl

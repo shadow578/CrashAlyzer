@@ -51,6 +51,11 @@ export interface BacktraceItem {
 }
 
 /**
+ * backtrace of the crash
+ */
+export type BackTrace = BacktraceItem[];
+
+/**
  * parsed crash log
  */
 export interface CrashLog {
@@ -62,7 +67,7 @@ export interface CrashLog {
   /**
    * backtrace of the crash
    */
-  backtrace: BacktraceItem[];
+  backtrace: BackTrace;
 }
 
 /**

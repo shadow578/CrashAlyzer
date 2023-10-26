@@ -7,7 +7,10 @@ const execAsync = promisify(exec);
  * path to addr2line executable, used by addr2line()
  */
 // eslint-disable-next-line prefer-const
-export let addr2linePath = 'arm-none-eabi-addr2line';
+let addr2linePath = 'arm-none-eabi-addr2line';
+export function setAddr2LinePath(path: string) {
+  addr2linePath = path;
+}
 
 /**
  * result of addr2line invocation

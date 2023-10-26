@@ -1,7 +1,8 @@
 import PARSERS, { CrashLogParser, CrashLogRegisters, BackTrace, cleanupAndSplitCrashLog } from './parsers';
 import { TablePrinter } from './ui/table';
 import { addr2line as invokeAddr2line, Addr2LineResult, setAddr2LinePath, addr2lineAvailable } from './addr2line';
-import * as CFSR from './cfsr';
+import * as CFSR from './registers/cfsr';
+import * as HFSR from './registers/hfsr';
 import { prompt } from 'enquirer';
 import * as fs from 'fs';
 import * as chalk from 'chalk';
@@ -192,6 +193,12 @@ const CFSRFlagDocs: Record<CFSR.CFSRFaultFlag, string> = {
   UNDEFINSTR: 'Undefined Instruction 🚫',
 };
 
+const HFSRFlagDocs: Record<HFSR.HFSRFaultFlag, string> = {
+  DEBUGEVT: 'Debug Event 🤖',
+  FORCED: 'Forced Hard Fault 🚧',
+  VECTBL: 'Vector Table Hard Fault 🚧',
+};
+
 /**
  * custom formatter functions for registers.
  * @param tbl table writer to push formatted values to.
@@ -221,7 +228,7 @@ const registerFormatters: Partial<Record<keyof CrashLogRegisters, RegisterFormat
     }
   },
   CFSR: async (tbl, value, registers) => {
-    CFSR.parseCFSR(value).forEach((flag) => {
+    CFSR.parse(value).forEach((flag) => {
       tbl
         .commitRow() // finish previous row
         .pushColumn('') // empty column for alignment
@@ -236,6 +243,14 @@ const registerFormatters: Partial<Record<keyof CrashLogRegisters, RegisterFormat
       if (flag === 'BFARVALID' && registers.BFAR) {
         tbl.pushColumn(`BFAR: ${registers.BFAR.toHex()}`);
       }
+    });
+  },
+  HFSR: async (tbl, value) => {
+    HFSR.parse(value).forEach((flag) => {
+      tbl
+        .commitRow() // finish previous row
+        .pushColumn('') // empty column for alignment
+        .pushColumn(`- ${flag}: ${HFSRFlagDocs[flag]}`, 0); // flag name and doc, width=0 to bypass table formatting
     });
   },
 };

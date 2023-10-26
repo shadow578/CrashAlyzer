@@ -1,3 +1,5 @@
+import { checkFlags } from "./common";
+
 /**
  * CFSR MemFault flag names to bit position in MemManage Fault Status Register
  */
@@ -61,24 +63,12 @@ export type CFSRFaultFlag = MemFaultFlag | BusFaultFlag | UsageFaultFlag;
  * @param cfsr CFSR register value
  * @returns set of CFSR fault flags
  */
-export function parseCFSR(cfsr: number): Set<CFSRFaultFlag> {
+export function parse(cfsr: number): Set<CFSRFaultFlag> {
   const flags = new Set<CFSRFaultFlag>();
 
-  const checkFlag = (offset: number, bit: number): boolean => {
-    return (cfsr & (1 << (offset + bit))) !== 0;
-  };
-
-  const checkFlags = (offset: number, flagDef: Record<string, number>): void => {
-    for (const flag of Object.keys(flagDef)) {
-      if (checkFlag(offset, flagDef[flag])) {
-        flags.add(flag as CFSRFaultFlag);
-      }
-    }
-  };
-
-  checkFlags(MMFSR_OFFSET, MemFaultFlags);
-  checkFlags(BFSR_OFFSET, BusFaultFlags);
-  checkFlags(UFSR_OFFSET, UsageFaultFlags);
+  checkFlags(cfsr, flags, MMFSR_OFFSET, MemFaultFlags);
+  checkFlags(cfsr, flags, BFSR_OFFSET, BusFaultFlags);
+  checkFlags(cfsr, flags, UFSR_OFFSET, UsageFaultFlags);
 
   return flags;
 }

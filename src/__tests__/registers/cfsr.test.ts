@@ -1,4 +1,4 @@
-import { parseCFSR } from '../cfsr';
+import { parse } from '../../registers/cfsr';
 
 //
 // MMFSR
@@ -52,96 +52,96 @@ test('test harness sanity check', () => {
   expect(DIVBYZERO | UNALIGNED).toBe(0x0300_0000);
 });
 
-describe('parseCFSR MMFSR single flags', () => {
+describe('parse MMFSR single flags', () => {
   test('MMARVALID', () => {
-    expect(parseCFSR(MMARVALID)).toContain('MMARVALID');
+    expect(parse(MMARVALID)).toContain('MMARVALID');
   });
 
   test('MLSPERR', () => {
-    expect(parseCFSR(MLSPERR)).toContain('MLSPERR');
+    expect(parse(MLSPERR)).toContain('MLSPERR');
   });
 
   test('MSTKERR', () => {
-    expect(parseCFSR(MSTKERR)).toContain('MSTKERR');
+    expect(parse(MSTKERR)).toContain('MSTKERR');
   });
 
   test('MUNSTKERR', () => {
-    expect(parseCFSR(MUNSTKERR)).toContain('MUNSTKERR');
+    expect(parse(MUNSTKERR)).toContain('MUNSTKERR');
   });
 
   test('DACCVIOL', () => {
-    expect(parseCFSR(DACCVIOL)).toContain('DACCVIOL');
+    expect(parse(DACCVIOL)).toContain('DACCVIOL');
   });
 
   test('IACCVIOL', () => {
-    expect(parseCFSR(IACCVIOL)).toContain('IACCVIOL');
+    expect(parse(IACCVIOL)).toContain('IACCVIOL');
   });
 });
 
-describe('parseCFSR BFSR single flags', () => {
+describe('parse BFSR single flags', () => {
   test('BFARVALID', () => {
-    expect(parseCFSR(BFARVALID)).toContain('BFARVALID');
+    expect(parse(BFARVALID)).toContain('BFARVALID');
   });
 
   test('LSPERR', () => {
-    expect(parseCFSR(LSPERR)).toContain('LSPERR');
+    expect(parse(LSPERR)).toContain('LSPERR');
   });
 
   test('STKERR', () => {
-    expect(parseCFSR(STKERR)).toContain('STKERR');
+    expect(parse(STKERR)).toContain('STKERR');
   });
 
   test('UNSTKERR', () => {
-    expect(parseCFSR(UNSTKERR)).toContain('UNSTKERR');
+    expect(parse(UNSTKERR)).toContain('UNSTKERR');
   });
 
   test('IMPRECISERR', () => {
-    expect(parseCFSR(IMPRECISERR)).toContain('IMPRECISERR');
+    expect(parse(IMPRECISERR)).toContain('IMPRECISERR');
   });
 
   test('PRECISERR', () => {
-    expect(parseCFSR(PRECISERR)).toContain('PRECISERR');
+    expect(parse(PRECISERR)).toContain('PRECISERR');
   });
 
   test('IBUSERR', () => {
-    expect(parseCFSR(IBUSERR)).toContain('IBUSERR');
+    expect(parse(IBUSERR)).toContain('IBUSERR');
   });
 });
 
-describe('parseCFSR UFSR single flags', () => {
+describe('parse UFSR single flags', () => {
   test('DIVBYZERO', () => {
-    expect(parseCFSR(DIVBYZERO)).toContain('DIVBYZERO');
+    expect(parse(DIVBYZERO)).toContain('DIVBYZERO');
   });
 
   test('UNALIGNED', () => {
-    expect(parseCFSR(UNALIGNED)).toContain('UNALIGNED');
+    expect(parse(UNALIGNED)).toContain('UNALIGNED');
   });
 
   test('NOCP', () => {
-    expect(parseCFSR(NOCP)).toContain('NOCP');
+    expect(parse(NOCP)).toContain('NOCP');
   });
 
   test('INVPC', () => {
-    expect(parseCFSR(INVPC)).toContain('INVPC');
+    expect(parse(INVPC)).toContain('INVPC');
   });
 
   test('INVSTATE', () => {
-    expect(parseCFSR(INVSTATE)).toContain('INVSTATE');
+    expect(parse(INVSTATE)).toContain('INVSTATE');
   });
 
   test('UNDEFINSTR', () => {
-    expect(parseCFSR(UNDEFINSTR)).toContain('UNDEFINSTR');
+    expect(parse(UNDEFINSTR)).toContain('UNDEFINSTR');
   });
 });
 
-describe('parseCFSR multiple flags', () => {
+describe('parse multiple flags', () => {
   test('MMARVALID | DIVBYZERO', () => {
-    expect(parseCFSR(MMARVALID | DIVBYZERO)).toContain('MMARVALID');
-    expect(parseCFSR(MMARVALID | DIVBYZERO)).toContain('DIVBYZERO');
+    expect(parse(MMARVALID | DIVBYZERO)).toContain('MMARVALID');
+    expect(parse(MMARVALID | DIVBYZERO)).toContain('DIVBYZERO');
   });
 
   test('MLSPERR | UNALIGNED', () => {
-    expect(parseCFSR(MLSPERR | UNALIGNED)).toContain('MLSPERR');
-    expect(parseCFSR(MLSPERR | UNALIGNED)).toContain('UNALIGNED');
+    expect(parse(MLSPERR | UNALIGNED)).toContain('MLSPERR');
+    expect(parse(MLSPERR | UNALIGNED)).toContain('UNALIGNED');
   });
 });

@@ -48,7 +48,7 @@ export interface Addr2LineResult {
  * @param address the address to lookup
  * @returns the result of the addr2line invocation
  */
-export async function addr2line(elfPath: string, address: number): Promise<Addr2LineResult> {
+export async function addr2line(elfPath: string, address: number): Promise<Addr2LineResult | undefined> {
   // addr2line -e <elf> -f -C <address>
   // -e <elf> - the elf file to use
   // -f - show function name
@@ -73,6 +73,11 @@ export async function addr2line(elfPath: string, address: number): Promise<Addr2
   const fileName = path.basename(filePath);
   const line = pathAndLineMatch[2];
 
+  // if the line was not found, addr2line will output "??:0"
+  if (filePath === '??' || line === '0') {
+    return undefined;
+  }
+
   return {
     file: {
       name: fileName,
@@ -81,4 +86,21 @@ export async function addr2line(elfPath: string, address: number): Promise<Addr2
     line: parseInt(line, 10),
     functionName,
   };
+}
+
+/**
+ * check if addr2line is available
+ *
+ * @param execPath path to addr2line executable. if not given, uses the global addr2line path
+ * @returns is addr2line available
+ */
+export async function addr2lineAvailable(execPath?: string): Promise<boolean> {
+  try {
+    const { stdout } = await execAsync(`${execPath ?? addr2linePath} --version`);
+
+    // for addr2line, stdout should contain "GNU addr2line"
+    return stdout.includes('GNU addr2line');
+  } catch (error) {
+    return false;
+  }
 }

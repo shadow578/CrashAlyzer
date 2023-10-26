@@ -1,13 +1,10 @@
 import PARSERS, { CrashLogParser, CrashLogRegisters, BackTrace, cleanupAndSplitCrashLog } from './parsers';
 import { TablePrinter } from './ui/table';
-import { addr2line as invokeAddr2line, Addr2LineResult, setAddr2LinePath } from './addr2line';
+import { addr2line as invokeAddr2line, Addr2LineResult, setAddr2LinePath, addr2lineAvailable } from './addr2line';
 import * as CFSR from './cfsr';
 import { prompt } from 'enquirer';
 import * as fs from 'fs';
 import * as chalk from 'chalk';
-import { promisify } from 'util';
-import { exec } from 'child_process';
-const execAsync = promisify(exec);
 
 // add toHex() function to numbers
 declare global {
@@ -141,12 +138,11 @@ function validatePathExists(path: string): true | string {
 }
 
 async function validateAddr2Line(path: string): Promise<true | string> {
-  try {
-    await execAsync(`${path} --version`);
+  if (await addr2lineAvailable(path)) {
     return true;
-  } catch (error) {
-    return `cannot execute ${path}: ${error}`;
   }
+
+  return `cannot execute addr2line @ ${path}`;
 }
 
 async function validateCrashLog(input: string): Promise<true | string> {

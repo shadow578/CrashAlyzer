@@ -5,7 +5,7 @@ import { addr2lineAvailable } from '../addr2line';
 import { DEFAULT_ADDR2LINE_PATH } from './defaults';
 import * as fs from 'fs';
 import * as chalk from 'chalk';
-import {promisify} from 'util';
+import { promisify } from 'util';
 
 const readFileAsync = promisify(fs.readFile);
 

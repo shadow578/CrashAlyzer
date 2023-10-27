@@ -36,7 +36,7 @@ async function main() {
 
         // check if any parser can handle the input
         for (const p of PARSERS) {
-          if (await p.canParse(cleanupAndSplitCrashLog(input))) {
+          if ((await p.findStartIndex(cleanupAndSplitCrashLog(input))).canParse) {
             return true;
           }
         }
@@ -87,14 +87,17 @@ async function main() {
 
   // find the right parser for the crash log
   let parser: CrashLogParser | undefined = undefined;
+  let startIndex: number | undefined = undefined;
   for (const p of PARSERS) {
-    if (await p.canParse(crashLogLines)) {
+    const { index, canParse } = await p.findStartIndex(crashLogLines);
+    if (canParse) {
       parser = p;
+      startIndex = index;
       break;
     }
   }
 
-  if (!parser) {
+  if (!parser || startIndex === undefined) {
     console.log(
       '🧐',
       chalk.red(
@@ -105,6 +108,10 @@ async function main() {
   }
 
   console.log(chalk.green('Using parser:'), chalk.blue(parser.name), '🚀');
+
+  // skip lines before the crash log
+  console.log(chalk.green('Skipping first'), chalk.blue(startIndex.toString()), chalk.green('lines in crash log 🏃‍'));
+  crashLogLines.splice(0, startIndex);
 
   // parse the crash log
   const crashLog = await parser.parse(crashLogLines);

@@ -38,7 +38,7 @@ export class MarlinParser extends CrashLogParser {
     return true;
   }
 
-  public async canParse(crashLogLines: string[]): Promise<boolean> {
+  protected async canParse(crashLogLines: string[]): Promise<boolean> {
     // marlin begins the crash log with "## Software Fault detected ##"
     return crashLogLines[0].startsWith('## Software Fault detected ##');
   }

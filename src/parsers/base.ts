@@ -85,12 +85,12 @@ export abstract class CrashLogParser {
   public abstract get backtraceSupported(): boolean;
 
   /**
-   * check if this parser can parse the given crash log
+   * check if this parser can parse the given crash log, starting with the first line
    *
    * @param crashLogLines lines of the crash log, empty lines are already removed
    * @returns true if this parser can parse the given crash log
    */
-  public abstract canParse(crashLogLines: string[]): Promise<boolean>;
+  protected abstract canParse(crashLogLines: string[]): Promise<boolean>;
 
   /**
    * parse the given crash log into a CrashLog object
@@ -99,4 +99,31 @@ export abstract class CrashLogParser {
    * @returns parsed crash log
    */
   public abstract parse(crashLogLines: string[]): Promise<CrashLog>;
+
+  /**
+   * scan the given raw crash log for the first line the parser can parse (= the first line of the crash log)
+   * parse() expects the crash log to start with the line returned by this function
+   *
+   * @param crashLogLines raw crash log lines
+   * @returns index of the first line of the crash log, and if the parser can parse it
+   */
+  public async findStartIndex(crashLogLines: string[]): Promise<{ index: number; canParse: boolean }> {
+    // incrementally check if we can parse the crash log starting at each line
+    for (let i = 0; i < crashLogLines.length; i++) {
+      const line = crashLogLines[i];
+
+      if (await this.canParse([line])) {
+        return {
+          index: i,
+          canParse: true,
+        };
+      }
+    }
+
+    // no match found
+    return {
+      index: 0,
+      canParse: false,
+    };
+  }
 }

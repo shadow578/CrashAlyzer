@@ -38,7 +38,7 @@ export class HC32Parser extends CrashLogParser {
     return false;
   }
 
-  public async canParse(crashLogLines: string[]): Promise<boolean> {
+  protected async canParse(crashLogLines: string[]): Promise<boolean> {
     // HC32 begins the crash log with "*** HARDFAULT ***"
     return crashLogLines[0].startsWith('*** HARDFAULT ***');
   }

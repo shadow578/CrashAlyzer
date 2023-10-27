@@ -3,8 +3,8 @@ import { cleanupAndSplitCrashLog } from '../../parsers';
 
 const parser = new HC32Parser();
 
-describe('canParse', () => {
-  test('should return true for a HC32 crash log', async () => {
+describe('findStartIndex', () => {
+  test('should find start for a HC32 crash log', async () => {
     const crashLogText = `
         *** HARDFAULT ***
         - FSR / FAR:
@@ -30,10 +30,12 @@ describe('canParse', () => {
 
     const crashLogLines = cleanupAndSplitCrashLog(crashLogText);
 
-    expect(await parser.canParse(crashLogLines)).toBeTruthy();
+    const result = await parser.findStartIndex(crashLogLines);
+    expect(result).toHaveProperty('canParse', true);
+    expect(result).toHaveProperty('index', 0);
   });
 
-  test('should return false for a marlin crash log', async () => {
+  test('should not find start for a marlin crash log', async () => {
     const crashLogText = `
         ## Software Fault detected ##
         Cause: Hard
@@ -63,7 +65,63 @@ describe('canParse', () => {
 
     const crashLogLines = cleanupAndSplitCrashLog(crashLogText);
 
-    expect(await parser.canParse(crashLogLines)).toBeFalsy();
+    const result = await parser.findStartIndex(crashLogLines);
+    expect(result).toHaveProperty('canParse', false);
+  });
+
+  test('should find start for a HC32 crash log with garbage lines', async () => {
+    const crashLogText = `
+         T:21.25 /0.00 B:21.25 /0.00 S:25.00 @:0 B@:0
+        wait
+        wait
+         T:21.25 /0.00 B:21.25 /0.00 S:25.00 @:0 B@:0
+        wait
+        wait
+         T:21.25 /0.00 B:21.25 /0.00 S:25.00 @:0 B@:0
+        wait
+        wait
+         T:21.25 /0.00 B:21.25 /0.00 S:25.00 @:0 B@:0
+        wait
+        wait
+         T:21.25 /0.00 B:21.25 /0.00 S:25.00 @:0 B@:0
+        wait
+        wait
+         T:21.25 /0.00 B:21.25 /0.00 S:25.00 @:0 B@:0
+        wait
+        wait
+         T:21.25 /0.00 B:21.25 /0.00 S:25.00 @:0 B@:0
+        wait
+        D451 T2
+        Disabling heaters
+
+
+        *** HARDFAULT ***
+        - FSR / FAR:
+        SCB->HFSR = 0x40000000
+        SCB->CFSR = 0x02000000
+        SCB->DFSR = 0x00000000
+        SCB->AFSR = 0x00000000
+        - Usage fault:
+         * DIVBYZERO
+        - Stack frame:
+        R0 = 0x00000002
+        R1 = 0x1fff8c0c
+        R2 = 0x00000000
+        R3 = 0x000001c4
+        R12 = 0x7fffffff
+        LR = 0x1fff848c
+        PC = 0x0001af4a
+        PSR = 0x61000000
+        - Misc:
+        LR = 0xfffffff9
+        ***
+        `;
+
+    const crashLogLines = cleanupAndSplitCrashLog(crashLogText);
+
+    const result = await parser.findStartIndex(crashLogLines);
+    expect(result).toHaveProperty('canParse', true);
+    expect(result).toHaveProperty('index', 22); // empty lines are removed during cleanup
   });
 });
 

@@ -2,10 +2,12 @@ import { ProcessingArgs } from '../processing';
 import * as yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { addr2lineAvailable } from '../addr2line';
-import { DEFAULT_ELF_PATH, DEFAULT_ADDR2LINE_PATH } from './defaults';
-import * as fs from 'fs/promises';
-import * as fsSync from 'fs';
+import { DEFAULT_ADDR2LINE_PATH } from './defaults';
+import * as fs from 'fs';
 import * as chalk from 'chalk';
+import {promisify} from 'util';
+
+const readFileAsync = promisify(fs.readFile);
 
 /**
  * gathers processing args from the command line interface
@@ -29,8 +31,6 @@ export async function getCLIArgs(): Promise<Partial<ProcessingArgs>> {
       alias: 'i',
       type: 'string',
       description: 'Path to Firmware ELF File',
-      default: DEFAULT_ELF_PATH,
-      defaultDescription: `${DEFAULT_ELF_PATH} from the current working directory`,
       requiresArg: false,
     })
     .option('addr2line', {
@@ -46,7 +46,7 @@ export async function getCLIArgs(): Promise<Partial<ProcessingArgs>> {
   if (logPath) {
     // if --log is provided, read the file
     try {
-      crashLog = await fs.readFile(logPath, 'utf8');
+      crashLog = await readFileAsync(logPath, 'utf8');
     } catch (error) {
       console.error(chalk.red('🙅‍♂️ Oops! It seems we cannot access the log file you provided.'));
       process.exit(1);
@@ -62,7 +62,7 @@ export async function getCLIArgs(): Promise<Partial<ProcessingArgs>> {
   }
 
   // validate elf input exists
-  if (!fsSync.existsSync(elfPath)) {
+  if (elfPath !== undefined && !fs.existsSync(elfPath)) {
     console.error(chalk.red('🙅‍ Oops! It seems we cannot access the firmware ELF file you provided.'));
     process.exit(1);
   }

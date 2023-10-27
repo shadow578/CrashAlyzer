@@ -9,6 +9,7 @@ export function cleanupAndSplitCrashLog(crashLog: string): string[] {
     .split(/\r?\n/) // split into lines
     .map((line) => line.trim()) // trim whitespace
     .map((line) => line.replace(/^recv:/i, '')) // remove 'Recv:' prefix (OctoPrint terminal)
+    .map((line) => line.replace(/^send:/i, '')) // remove 'Send:' prefix (OctoPrint terminal)
     .map((line) => line.trim()) // trim whitespace again
     .filter((line) => line.length > 0); // remove empty lines
 }

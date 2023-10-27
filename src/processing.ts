@@ -6,6 +6,7 @@ import * as HFSR from './registers/hfsr';
 import * as PSR from './registers/psr';
 import * as chalk from 'chalk';
 import './utils/toHex';
+import * as fs from 'fs';
 
 /**
  * arguments for processAndPrintCrashLog()
@@ -40,8 +41,15 @@ export async function processAndPrintCrashLog(options: ProcessingArgs) {
     return;
   }
 
-  // set global elf path
+  // set global elf path and test
   elfPath = options.elfPath;
+  if (!fs.existsSync(elfPath)) {
+    console.log(
+      '🧐',
+      chalk.red("Oops! It seems we couldn't find the firmware ELF file. Please check your input and try again."),
+    );
+    return;
+  }
 
   // split crash log into lines
   const crashLogLines = cleanupAndSplitCrashLog(options.crashLog);

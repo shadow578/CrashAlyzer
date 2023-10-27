@@ -1,17 +1,29 @@
 import PARSERS, { cleanupAndSplitCrashLog } from '../parsers';
-import { addr2lineAvailable } from '../addr2line';
 import { ProcessingArgs } from '../processing';
 import { prompt } from 'enquirer';
 import * as fs from 'fs';
+import { DEFAULT_ELF_PATH } from './defaults';
+
+type RemoveArray<T> = T extends (infer U)[] ? U : T;
+type PromptOptions = RemoveArray<Parameters<typeof prompt>[0]>;
 
 /**
  * gathers processing args from the user using a terminal UI
  *
+ * @param existingArgs existing processing args previously gathered from the CLI
  * @returns processing args gathered from the user
  */
-export async function getUserInput(): Promise<ProcessingArgs> {
+export async function getUserInput(existingArgs: Partial<ProcessingArgs>): Promise<Partial<ProcessingArgs>> {
+  const maybePrompt = (arg: keyof ProcessingArgs, prompt: PromptOptions): PromptOptions[] => {
+    if (existingArgs[arg] !== undefined) {
+      return [];
+    }
+
+    return [prompt];
+  };
+
   const userInput = (await prompt([
-    {
+    ...maybePrompt('crashLog', {
       type: 'input',
       name: 'crashLog',
       multiline: true,
@@ -31,11 +43,11 @@ export async function getUserInput(): Promise<ProcessingArgs> {
 
         return "Oops! It seems we couldn't find a parser for the given crash log. Please re-enter the crash log. 🤔";
       },
-    },
-    {
+    }),
+    ...maybePrompt('elfPath', {
       type: 'input',
       name: 'elfPath',
-      initial: './firmware.elf',
+      initial: DEFAULT_ELF_PATH,
       message: 'Path to ELF File 📂',
       validate: (path) => {
         if (fs.existsSync(path)) {
@@ -44,24 +56,10 @@ export async function getUserInput(): Promise<ProcessingArgs> {
 
         return 'Uh-oh! It seems we cannot access the firmware file you provided. Please re-enter the path to firmware.elf. 🤖';
       },
-    },
-    {
-      type: 'input',
-      name: 'addr2linePath',
-      initial: 'arm-none-eabi-addr2line',
-      message: 'Path to Addr2line 📂',
-      validate: async (path) => {
-        if (await addr2lineAvailable(path)) {
-          return true;
-        }
-
-        return `Oops! It appears we cannot execute addr2line @ ${path}. Please re-enter the path to addr2line. 🤷‍♂️`;
-      },
-    },
+    }),
   ])) as {
-    crashLog: string;
-    elfPath: string;
-    addr2linePath: string;
+    crashLog?: string;
+    elfPath?: string;
   };
 
   return userInput;

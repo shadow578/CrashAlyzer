@@ -29,6 +29,18 @@ export interface ProcessingArgs {
 }
 
 /**
+ * check if all required fields of the processing args are populated
+ *
+ * @param args the args to check
+ * @returns are the args populated?
+ */
+export function processingArgsPopulated(args: Partial<ProcessingArgs>): args is ProcessingArgs {
+  return (
+    typeof args.crashLog === 'string' && typeof args.elfPath === 'string' && typeof args.addr2linePath === 'string'
+  );
+}
+
+/**
  * process the user input and print crash log information to the console
  *
  * @param options processing options
@@ -106,7 +118,7 @@ export async function processAndPrintCrashLog(options: ProcessingArgs) {
     if (crashLog.backtrace.length > 0) {
       console.log(chalk.white((await formatBacktrace(crashLog.backtrace)).toString()));
     } else {
-      console.log(chalk.yellow('No backtrace found 🤷‍♂️'));
+      console.log(chalk.yellow('No backtrace found 🤷‍'));
     }
   }
 

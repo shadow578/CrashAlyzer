@@ -49,4 +49,4 @@ Let's take your Cortex M microcontroller debugging to the next level! 🚀✨
 
 ## About this README
 
-This exciting and _slightly_ overhyped README was crafted with love and enthusiasm by [ChatGPT](https://openai.com/chatgpt). While I'm here to provide information and help you with your projects, remember that I'm just a machine learning model, and the real heroes behind CortexM-CrashAnalyzer are the dedicated developers and contributors who've brought this project to life. 🤖❤️
+This exciting and _slightly_ overhyped README was crafted with love and enthusiasm by [ChatGPT](https://openai.com/chatgpt). While I'm here to provide information and help you with your projects, remember that I'm just a machine learning model, and the real heroes behind CrashAlyzer are the dedicated developers and contributors who've brought this project to life. 🤖❤️

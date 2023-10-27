@@ -15,19 +15,27 @@ CrashAlyzer is your easy-to-use(™) crashlog analyzer for ARM Cortex-M microcon
 - 📚 Register Parsing & Backtrace Analysis: Dive deep into the heart of your microcontroller's crash with our built-in register parsing and backtrace analysis tools. Uncover the root cause of those pesky issues!
 - 🌐 Automatic Addr2line Lookup: We've got your back with automatic addr2line lookup. No more manual address translation headaches!
 - 🛠️ Fully Guided TUI: Our user-friendly user interface (TUI) guides you through the entire analysis process. Whether you're a seasoned developer or just starting, CrashAlyzer is here to help.
+- 💻 Powerful CLI: CrashAlyzer provides a powerful command-line interface (CLI) for those who prefer a more streamlined and scriptable debugging experience. Analyze logs with precision using command-line options.
 - 🧩 Easily Extendable: CrashAlyzer is designed with extensibility in mind. Add support for more platforms and microcontrollers with ease. Our open architecture lets you expand your debugging toolkit effortlessly.
 
 ## Getting Started
 
 Getting started with CrashAlyzer is a breeze. Follow these simple steps to unleash the power of Cortex M debugging:
 
-1. **Installation**: Install CrashAlyzer using via your favorite package manager (as long as that happens to be npm).
+### 1. **Installation**: Install CrashAlyzer.
+
+Install CrashAlyzer quickly and easily with your favorite package manager\*.
 
 ```bash
 $ npm install -g @shadow578/crashalyzer
 ```
 
-2. **Analyzer Your Logs**: Use the intuitive TUI to analyze crash logs effortlessly.
+> [!NOTE] > \* only applies if your favorite package manager happens to be **npm**
+
+### 2. **Analyzer Your Logs**: Analyze crash logs effortlessly.
+
+CrashAlyzer offers a flexible and user-friendly experience.
+Simply run `crashalyzer` and follow the on-screen instructions to analyze your crash logs.
 
 ```bash
 $ crashalyzer
@@ -35,7 +43,20 @@ $ crashalyzer
     ? Path to ELF File » firmware.elf
 ```
 
-3. **Discover the Magic**: Dive deep into the crash log analysis, unlock the secrets of your microcontroller, and conquer your project like a true hero! 🦸‍♂️
+If you'd rather not use the interactive mode, you can also pass the crash log and ELF file paths as command-line arguments.
+
+```bash
+$ crashalyzer
+    --log /path/to/crash.log
+    --input /path/to/firmware.elf
+    --addr2line /path/to/addr2line
+```
+
+All arguments are optional, and CrashAlyzer will prompt you for any missing information.
+
+### 3. **Discover the Magic**: Become the Cortex M debugging hero you were always meant to be.
+
+Dive deep into the crash log analysis, unlock the secrets of your microcontroller, and conquer your project like a true hero! 🦸‍♂️
 
 ## Contributing
 

@@ -265,8 +265,8 @@ async function formatRegisters(registers: CrashLogRegisters): Promise<TablePrint
   tbl.pushColumn('Register').pushColumn('Value').commitRow();
 
   for (const [name, value] of Object.entries(registers)) {
-    // push register name and value as 32-bit (4 byte) hex
-    tbl.pushColumn(name).pushColumn(value.toHex(4));
+    // push register name and value as 32-bit hex
+    tbl.pushColumn(name).pushColumn(value.toHex(32));
 
     // append extra info if available
     const formatter = registerFormatters[name as keyof CrashLogRegisters];
@@ -304,14 +304,14 @@ async function formatBacktrace(backtrace: BackTrace): Promise<TablePrinter> {
   for (const [i, item] of backtrace.map((item, i) => [i, item] as const)) {
     const a2l = await addr2line(item.PC);
 
-    const functionPlusOffset = `${item.function?.baseAddress.toHex(4) ?? '??'}+${
+    const functionPlusOffset = `${item.function?.baseAddress.toHex(32) ?? '??'}+${
       item.function?.instructionOffset ?? '??'
     }`;
     const functionName = a2l ? a2l.functionName : item.function?.name ?? '??';
     const filePlusLine = a2l ? `${a2l.file.name}:${a2l.line}` : '??:?';
     tbl
       .pushColumn(i.toString()) // #
-      .pushColumn(`${item.PC.toHex(4)} (${functionPlusOffset})`) // address, 32-bit (4 byte) hex; function base + offset
+      .pushColumn(`${item.PC.toHex(32)} (${functionPlusOffset})`) // address, 32-bit hex; function base + offset
       .pushColumn(functionName) // function name
       .pushColumn(filePlusLine) // file:line
       .commitRow();

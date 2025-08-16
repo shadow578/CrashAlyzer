@@ -41,7 +41,7 @@ export async function getUserInput(existingArgs: Partial<ProcessingArgs>): Promi
           }
         }
 
-        return "no parser found for the provided crash log! is it supported?";
+        return 'no parser found for the provided crash log! is it supported?';
       },
     }),
     ...maybePrompt('elfPath', {

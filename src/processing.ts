@@ -49,16 +49,14 @@ export async function processAndPrintCrashLog(options: ProcessingArgs) {
   // set global addr2line path and test
   setAddr2LinePath(options.addr2linePath);
   if (!addr2lineAvailable()) {
-    console.log(chalk.red("addr2line was not found at the specified path! please check your input."));
+    console.log(chalk.red('addr2line was not found at the specified path! please check your input.'));
     return;
   }
 
   // set global elf path and test
   elfPath = options.elfPath;
   if (!fs.existsSync(elfPath)) {
-    console.log(
-      chalk.red("the firmware.ELF was not found at the specified path! please check your input."),
-    );
+    console.log(chalk.red('the firmware.ELF was not found at the specified path! please check your input.'));
     return;
   }
 
@@ -78,11 +76,7 @@ export async function processAndPrintCrashLog(options: ProcessingArgs) {
   }
 
   if (!parser || startIndex === undefined) {
-    console.log(
-      chalk.red(
-        "no parser found for the provided crash log! is it supported?",
-      ),
-    );
+    console.log(chalk.red('no parser found for the provided crash log! is it supported?'));
     return;
   }
 

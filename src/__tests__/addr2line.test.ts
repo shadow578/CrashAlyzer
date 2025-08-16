@@ -48,7 +48,11 @@ describe('addr2line', () => {
     expect(a2l).toEqual({
       file: {
         name: 'main.cpp',
-        path: 'C:\\Users\\Username\\.platformio\\packages\\framework-arduino-hc32f46x\\cores\\arduino\\main/main.cpp',
+        path: expect.stringMatching(
+          // on Windows (platformio addr2line): C:\Users\Username\.platformio\packages\framework-arduino-hc32f46x\cores\arduino\main/main.cpp
+          // on Linux /CI (apt default addr2line): E:\Source\marlin\Marlin-H32/C:\Users\Username\.platformio\packages\framework-arduino-hc32f46x\cores\arduino\main/main.cpp
+          /(?:C:\\Users\\Username\\\.platformio\\packages\\framework-arduino-hc32f46x\\cores\\arduino\\main\/main\.cpp)|(?:E:\\Source\\marlin\\Marlin-H32\/C:\\Users\\Username\\.platformio\\packages\\framework-arduino-hc32f46x\\cores\\arduino\\main\/main\.cpp)/,
+        ),
       },
       line: 20,
       functionName: 'main',

@@ -47,7 +47,7 @@ export async function getCLIArgs(): Promise<Partial<ProcessingArgs>> {
     // if --log is provided, read the file
     try {
       crashLog = await readFileAsync(logPath, 'utf8');
-    } catch (error) {
+    } catch (_error) {
       console.error(chalk.red('the crash log file could not be read. Please check the path and permissions.'));
       process.exit(1);
     }

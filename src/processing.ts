@@ -142,7 +142,7 @@ let elfPath: string;
 async function addr2line(address: number): Promise<Addr2LineResult | undefined> {
   try {
     return await invokeAddr2line(elfPath, address);
-  } catch (error) {
+  } catch (_error) {
     return;
   }
 }

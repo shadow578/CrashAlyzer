@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  lint:
+    name: "Check Code Linting"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.18" # LTS
+          cache: "npm"
+      - run: npm ci
+      - run: npm run lint
+
+  format:
+    name: "Check Code Formatting"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.18" # LTS
+          cache: "npm"
+      - run: npm ci
+      - run: npm run format:check
+
+  typecheck:
+    name: "Validate TypeScript Types"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.18" # LTS
+          cache: "npm"
+      - run: npm ci
+      - run: npm run typecheck
+
+  test:
+    name: "Run Tests"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs: [lint, format, typecheck]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.18" # LTS
+          cache: "npm"
+      - run: npm ci
+      - run: npm run test

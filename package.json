@@ -30,6 +30,8 @@
     "test": "jest --config jestconfig.json",
     "test:watch": "jest --config jestconfig.json --watch",
     "format": "prettier --ignore-path .gitignore --write \"src/**/*.+(js|ts|json)\"",
+    "format:check": "prettier --ignore-path .gitignore --check \"src/**/*.+(js|ts|json)\"",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint --ext .js,.ts src",
     "prepare": "npm run build",
     "prepublishOnly": "npm test && npm run lint",

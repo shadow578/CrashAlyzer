@@ -319,7 +319,7 @@ async function formatBacktrace(backtrace: BackTrace): Promise<TablePrinter> {
     const functionPlusOffset = `${item.function?.baseAddress.toHex(32) ?? '??'}+${
       item.function?.instructionOffset ?? '??'
     }`;
-    const functionName = a2l ? a2l.functionName : item.function?.name ?? '??';
+    const functionName = a2l ? a2l.functionName : (item.function?.name ?? '??');
     const filePlusLine = a2l ? `${a2l.file.name}:${a2l.line}` : '??:?';
     tbl
       .pushColumn(i.toString()) // #

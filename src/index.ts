@@ -16,7 +16,7 @@ async function main() {
 
   // ensure args are populated
   if (!processingArgsPopulated(opts)) {
-    console.error('🙅‍ Oops! It seems we are missing some required arguments.');
+    console.error('Some required arguments are missing.');
     process.exit(1);
   }
 

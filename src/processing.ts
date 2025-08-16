@@ -49,7 +49,7 @@ export async function processAndPrintCrashLog(options: ProcessingArgs) {
   // set global addr2line path and test
   setAddr2LinePath(options.addr2linePath);
   if (!addr2lineAvailable()) {
-    console.log('🧐', chalk.red("Oops! It seems we couldn't find addr2line. Please check your input and try again."));
+    console.log(chalk.red("addr2line was not found at the specified path! please check your input."));
     return;
   }
 
@@ -57,8 +57,7 @@ export async function processAndPrintCrashLog(options: ProcessingArgs) {
   elfPath = options.elfPath;
   if (!fs.existsSync(elfPath)) {
     console.log(
-      '🧐',
-      chalk.red("Oops! It seems we couldn't find the firmware ELF file. Please check your input and try again."),
+      chalk.red("the firmware.ELF was not found at the specified path! please check your input."),
     );
     return;
   }
@@ -80,18 +79,17 @@ export async function processAndPrintCrashLog(options: ProcessingArgs) {
 
   if (!parser || startIndex === undefined) {
     console.log(
-      '🧐',
       chalk.red(
-        "Oops! It seems we couldn't find a parser for the given crash log. Please check your input and try again.",
+        "no parser found for the provided crash log! is it supported?",
       ),
     );
     return;
   }
 
-  console.log(chalk.green('Using parser:'), chalk.blue(parser.name), '🚀');
+  console.log(chalk.green('Using parser:'), chalk.blue(parser.name));
 
   // skip lines before the crash log
-  console.log(chalk.green('Skipping first'), chalk.blue(startIndex.toString()), chalk.green('lines in crash log 🏃‍'));
+  console.log(chalk.green('Skipping first'), chalk.blue(startIndex.toString()), chalk.green('lines in crash log'));
   crashLogLines.splice(0, startIndex);
 
   // parse the crash log
@@ -101,7 +99,7 @@ export async function processAndPrintCrashLog(options: ProcessingArgs) {
 
   // registers
   console.log();
-  console.log(chalk.blue('📊 Registers:'));
+  console.log(chalk.blue('Registers:'));
   console.log(
     chalk.white(
       (await formatRegisters(crashLog.registers)).toString({
@@ -114,11 +112,11 @@ export async function processAndPrintCrashLog(options: ProcessingArgs) {
   // backtrace
   if (parser.backtraceSupported) {
     console.log();
-    console.log(chalk.blue('🚀 Backtrace:'));
+    console.log(chalk.blue('Backtrace:'));
     if (crashLog.backtrace.length > 0) {
       console.log(chalk.white((await formatBacktrace(crashLog.backtrace)).toString()));
     } else {
-      console.log(chalk.yellow('No backtrace found 🤷‍'));
+      console.log(chalk.yellow('No backtrace found'));
     }
   }
 
@@ -126,7 +124,7 @@ export async function processAndPrintCrashLog(options: ProcessingArgs) {
   if (crashLog.registers.CFSR !== 0) {
     console.log();
     console.log(
-      chalk.cyan('📚 For more information on how to interpret the CFSR flags, see: '),
+      chalk.cyan('For more information on how to interpret the CFSR flags, see: '),
       // links to the CFSR spec and some blog posts about it
       ...[
         'https://interrupt.memfault.com/blog/cortex-m-fault-debug',
@@ -161,35 +159,35 @@ async function addr2line(address: number): Promise<Addr2LineResult | undefined> 
 
 const CFSRFlagDocs: Record<CFSR.CFSRFaultFlag, string> = {
   // MemFault
-  MMARVALID: 'Memory Management Fault Address Register (MMAR) is valid 🧐',
-  MLSPERR: 'Memory Management Fault occurred during floating-point lazy state preservation 🤖',
-  MSTKERR: 'Memory Management Fault occurred during exception stacking 🤖',
-  MUNSTKERR: 'Memory Management Fault occurred during exception unstacking 🤖',
-  DACCVIOL: 'Data Access Violation 🚧',
-  IACCVIOL: 'Instruction Access Violation 🚧',
+  MMARVALID: 'Memory Management Fault Address Register (MMAR) is valid',
+  MLSPERR: 'Memory Management Fault occurred during floating-point lazy state preservation',
+  MSTKERR: 'Memory Management Fault occurred during exception stacking',
+  MUNSTKERR: 'Memory Management Fault occurred during exception unstacking',
+  DACCVIOL: 'Data Access Violation',
+  IACCVIOL: 'Instruction Access Violation',
 
   // BusFault
-  BFARVALID: 'Bus Fault Address Register (BFAR) is valid 🧐',
-  LSPERR: 'Bus Fault occurred during floating-point lazy state preservation 🤖',
-  STKERR: 'Bus Fault occurred during exception stacking 🤖',
-  UNSTKERR: 'Bus Fault occurred during exception unstacking 🤖',
-  IMPRECISERR: 'Imprecise Data Access Error 🚧',
-  PRECISERR: 'Precise Data Access Error 🚧',
-  IBUSERR: 'Instruction Bus Error 🚧',
+  BFARVALID: 'Bus Fault Address Register (BFAR) is valid',
+  LSPERR: 'Bus Fault occurred during floating-point lazy state preservation',
+  STKERR: 'Bus Fault occurred during exception stacking',
+  UNSTKERR: 'Bus Fault occurred during exception unstacking',
+  IMPRECISERR: 'Imprecise Data Access Error',
+  PRECISERR: 'Precise Data Access Error',
+  IBUSERR: 'Instruction Bus Error',
 
   // UsageFault
-  DIVBYZERO: 'Division By Zero 🚫',
-  UNALIGNED: 'Unaligned Access 🚧',
-  NOCP: 'No Coprocessor 🤷‍♂️',
-  INVPC: 'Invalid PC Load 🚧',
-  INVSTATE: 'Invalid State 🚧',
-  UNDEFINSTR: 'Undefined Instruction 🚫',
+  DIVBYZERO: 'Division By Zero',
+  UNALIGNED: 'Unaligned Access',
+  NOCP: 'No Coprocessor',
+  INVPC: 'Invalid PC Load',
+  INVSTATE: 'Invalid State',
+  UNDEFINSTR: 'Undefined Instruction',
 };
 
 const HFSRFlagDocs: Record<HFSR.HFSRFaultFlag, string> = {
-  DEBUGEVT: 'Debug Event 🤖',
-  FORCED: 'Forced Hard Fault 🚧',
-  VECTBL: 'Vector Table Hard Fault 🚧',
+  DEBUGEVT: 'Debug Event',
+  FORCED: 'Forced Hard Fault',
+  VECTBL: 'Vector Table Hard Fault',
 };
 
 const APSRFlagDocs: Record<PSR.APSRFlag, string> = {

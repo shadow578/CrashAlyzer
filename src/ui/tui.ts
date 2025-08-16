@@ -27,7 +27,7 @@ export async function getUserInput(existingArgs: Partial<ProcessingArgs>): Promi
       type: 'input',
       name: 'crashLog',
       multiline: true,
-      message: 'Crash Log 📃',
+      message: 'Crash Log',
       validate: async (input) => {
         // must not be empty
         if (input.trim().length <= 0) {
@@ -41,20 +41,20 @@ export async function getUserInput(existingArgs: Partial<ProcessingArgs>): Promi
           }
         }
 
-        return "Oops! It seems we couldn't find a parser for the given crash log. Please re-enter the crash log. 🤔";
+        return "no parser found for the provided crash log! is it supported?";
       },
     }),
     ...maybePrompt('elfPath', {
       type: 'input',
       name: 'elfPath',
       initial: DEFAULT_ELF_PATH,
-      message: 'Path to ELF File 📂',
+      message: 'Path to ELF File',
       validate: (path) => {
         if (fs.existsSync(path)) {
           return true;
         }
 
-        return 'Uh-oh! It seems we cannot access the firmware file you provided. Please re-enter the path to firmware.elf. 🤖';
+        return 'the firmware.ELF was not found at the specified path! please check your input.';
       },
     }),
   ])) as {

@@ -48,7 +48,7 @@ export async function getCLIArgs(): Promise<Partial<ProcessingArgs>> {
     try {
       crashLog = await readFileAsync(logPath, 'utf8');
     } catch (error) {
-      console.error(chalk.red('🙅‍♂️ Oops! It seems we cannot access the log file you provided.'));
+      console.error(chalk.red('the crash log file could not be read. Please check the path and permissions.'));
       process.exit(1);
     }
   } else {
@@ -63,13 +63,13 @@ export async function getCLIArgs(): Promise<Partial<ProcessingArgs>> {
 
   // validate elf input exists
   if (elfPath !== undefined && !fs.existsSync(elfPath)) {
-    console.error(chalk.red('🙅‍ Oops! It seems we cannot access the firmware ELF file you provided.'));
+    console.error(chalk.red('the firmware.ELF could not be found.'));
     process.exit(1);
   }
 
   // validate addr2line is accessible
   if (!(await addr2lineAvailable(addr2linePath))) {
-    console.error(chalk.red('🙅‍ Oops! It seems we cannot access the addr2line binary you provided.'));
+    console.error(chalk.red('the addr2line binary could not be found or is not executable.'));
     process.exit(1);
   }
 

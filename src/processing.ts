@@ -4,7 +4,7 @@ import { addr2line as invokeAddr2line, Addr2LineResult, setAddr2LinePath, addr2l
 import * as CFSR from './registers/cfsr';
 import * as HFSR from './registers/hfsr';
 import * as PSR from './registers/psr';
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 import './utils/toHex';
 import * as fs from 'fs';
 
@@ -142,7 +142,7 @@ let elfPath: string;
 async function addr2line(address: number): Promise<Addr2LineResult | undefined> {
   try {
     return await invokeAddr2line(elfPath, address);
-  } catch (error) {
+  } catch (_error) {
     return;
   }
 }
@@ -319,7 +319,7 @@ async function formatBacktrace(backtrace: BackTrace): Promise<TablePrinter> {
     const functionPlusOffset = `${item.function?.baseAddress.toHex(32) ?? '??'}+${
       item.function?.instructionOffset ?? '??'
     }`;
-    const functionName = a2l ? a2l.functionName : item.function?.name ?? '??';
+    const functionName = a2l ? a2l.functionName : (item.function?.name ?? '??');
     const filePlusLine = a2l ? `${a2l.file.name}:${a2l.line}` : '??:?';
     tbl
       .pushColumn(i.toString()) // #

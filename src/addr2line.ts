@@ -100,7 +100,7 @@ export async function addr2lineAvailable(execPath?: string): Promise<boolean> {
 
     // for addr2line, stdout should contain "GNU addr2line"
     return stdout.includes('GNU addr2line');
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }

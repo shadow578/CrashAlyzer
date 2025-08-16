@@ -4,7 +4,7 @@ import { addr2line as invokeAddr2line, Addr2LineResult, setAddr2LinePath, addr2l
 import * as CFSR from './registers/cfsr';
 import * as HFSR from './registers/hfsr';
 import * as PSR from './registers/psr';
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 import './utils/toHex';
 import * as fs from 'fs';
 

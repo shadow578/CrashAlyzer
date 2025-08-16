@@ -1,6 +1,6 @@
 {
   "name": "@shadow578/crashalyzer",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "CrashAlyzer is your easy-to-use(™) crashlog analyzer for ARM Cortex-M microcontrollers.",
   "author": "shadow578",
   "license": "MIT",
